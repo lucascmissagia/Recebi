@@ -18,7 +18,7 @@ builder.Services.AddDbContext<RecebiContext>(options =>
 );
 
 // =========================================
-// 🔹 ADIÇÃO DOS SERVIÇOS DE AUTENTICAÇÃO JWT
+//  ADIÇÃO DOS SERVIÇOS DE AUTENTICAÇÃO JWT
 // =========================================
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
