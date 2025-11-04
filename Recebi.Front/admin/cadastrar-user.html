@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Cadastrar Usuário</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left"> <div class="brand"><img src="../imagens/logo.png" alt="Logo Recebi"><span>Recebi</span></div> <nav class="nav"><a class="secondary" href="index.html">Home</a><a class="secondary" href="usuarios.html">Usuários</a><a class="secondary" href="encomendas.html">Encomendas</a><a class="secondary" href="Registros.html">Registros</a></nav></div>
+       <div class="user-dropdown"><button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button><div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div></div>
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Cadastrar Novo Usuário</div>
+
+      <form id="form-user">
+        <div class="form-wrap">
+          <div class="form-row">
+            <label for="nome">Nome Completo</label>
+            <input id="nome" name="nome" type="text" required placeholder="Nome completo do usuário">
+          </div>
+
+          <div class="form-row">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required placeholder="exemplo@email.com">
+          </div>
+
+          <div class="form-row">
+            <label for="senha">Senha</label>
+            <input id="senha" name="senha" type="password" required placeholder="Senha de acesso inicial">
+          </div>
+
+           <div class="form-row">
+            <label for="tipoUsuario">Tipo de Usuário</label>
+            <select id="tipoUsuario" name="tipoUsuario" required>
+              <option value="">Selecione...</option>
+              <option value="Morador">Morador</option>
+              <option value="Porteiro">Porteiro</option>
+              <option value="Sindico">Síndico</option> 
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="apartamento">Apartamento (Obrigatório para Morador)</label>
+            <input id="apartamento" name="apartamento" placeholder="Ex.: 204">
+          </div>
+
+          <div class="form-row">
+            <label for="telefone">Telefone</label> 
+            <input id="telefone" name="telefone" placeholder="(27) 99999-9999" required> 
+          </div>
+          
+        </div> 
+
+        <div class="form-actions">
+          <a href="usuarios.html" class="btn secondary">Cancelar</a>
+          <button type="submit" class="btn">Cadastrar Usuário</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      // Ativa header
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+
+      document.getElementById('form-user').addEventListener('submit', async e =>{
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.textContent = 'Cadastrando...';
+
+        const tipoUsuario = document.getElementById('tipoUsuario').value;
+        const apartamento = document.getElementById('apartamento').value.trim();
+        // 🔹 PEGA O VALOR DO TELEFONE 🔹
+        const telefone = document.getElementById('telefone').value.trim(); 
+
+        // Validação: Apartamento obrigatório se for Morador
+        if (tipoUsuario === 'Morador' && !apartamento) {
+            alert('O campo Apartamento é obrigatório para usuários do tipo Morador.');
+            btn.disabled = false; btn.textContent = 'Cadastrar Usuário';
+            return;
+        }
+        
+        // 🔹 VALIDAÇÃO ADICIONADA PARA TELEFONE OBRIGATÓRIO 🔹
+        if (!telefone) {
+             alert('O campo Telefone é obrigatório.');
+             btn.disabled = false; btn.textContent = 'Cadastrar Usuário';
+             return;
+        }
+        // ================================================
+
+        const novoUsuario = {
+          nome: document.getElementById('nome').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          senha: document.getElementById('senha').value, 
+          tipoUsuario: tipoUsuario,
+          apartamento: apartamento || null, 
+          telefone: telefone // Usa a variável já validada
+        };
+
+        // Validações básicas (mantidas)
+         if (!novoUsuario.nome || !novoUsuario.email || !novoUsuario.senha || !novoUsuario.tipoUsuario) {
+             alert('Preencha todos os campos obrigatórios (Nome, Email, Senha, Tipo).');
+             btn.disabled = false; btn.textContent = 'Cadastrar Usuário';
+             return;
+         }
+
+        // Chama a função da API
+        if(typeof criarNovoUsuario === 'function') {
+            await criarNovoUsuario(novoUsuario);
+        } else {
+             alert('Erro: Função criarNovoUsuario não encontrada.');
+             // Reabilita botão em caso de erro no script.js
+             btn.disabled = false; btn.textContent = 'Cadastrar Usuário'; 
+        }
+
+        // Reabilita o botão APENAS se a função criarNovoUsuario falhar e não redirecionar
+        // (A função criarNovoUsuario já redireciona em caso de sucesso)
+        // Se chegou aqui, provavelmente houve um erro mostrado no alert da função.
+        if (window.location.pathname.endsWith('cadastrar-user.html')) { // Verifica se ainda está na página
+             btn.disabled = false; btn.textContent = 'Cadastrar Usuário';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

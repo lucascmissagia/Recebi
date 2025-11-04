@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Editar Usuário</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+      .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+      .checkbox-row label { margin: 0; font-size: 14px; }
+      .checkbox-row input[type="checkbox"] { width: auto; height: auto; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+       <div class="header-left"> <div class="brand"><img src="../imagens/logo.png" alt="Logo Recebi"><span>Recebi</span></div> <nav class="nav"><a class="secondary" href="index.html">Home</a><a class="secondary" href="usuarios.html">Usuários</a><a class="secondary" href="encomendas.html">Encomendas</a><a class="secondary" href="Registros.html">Registros</a></nav></div>
+       <div class="user-dropdown"><button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button><div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div></div>
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Editar Usuário</div>
+
+      <form id="form-edit-user">
+        <p id="loading-msg" style="text-align:center; padding: 20px;">Carregando dados do usuário...</p>
+        <div class="form-wrap" style="display:none;"> 
+          <input type="hidden" id="idUsuario"> 
+
+          <div class="form-row"> <label for="nome">Nome</label> <input id="nome" required> </div>
+          <div class="form-row"> <label for="tipoUsuario">Tipo de Usuário (Não editável)</label> <input id="tipoUsuario" readonly style="background:#eee;"> </div>
+          <div class="form-row"> <label for="apartamento">Apartamento</label> <input id="apartamento" placeholder="Ex.: 204"> </div>
+          <div class="form-row"> <label for="email">Email</label> <input id="email" type="email" required> </div>
+          <div class="form-row"> <label for="telefone">Telefone</label> <input id="telefone" placeholder="(Opcional)"> </div>
+          <div class="form-row"> <label for="senha">Nova Senha (Opcional)</label> <input id="senha" type="password" placeholder="Deixe em branco para não alterar"> </div>
+
+          <div class="form-row checkbox-row" style="grid-column: 1 / -1;">
+             <input type="checkbox" id="statusAtivo" name="statusAtivo" value="Ativo">
+             <label for="statusAtivo">Usuário Ativo</label>
+           </div>
+          
+        </div>
+
+        <div class="form-actions" style="display:none;"> 
+          <a href="usuarios.html" class="btn secondary">Cancelar</a>
+          <button type="submit" class="btn">Salvar Alterações</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Ativa header
+      if (typeof setupHeaderSessao === 'function') { setupHeaderSessao(); }
+
+      const form = document.getElementById('form-edit-user');
+      const formWrap = form.querySelector('.form-wrap');
+      const formActions = form.querySelector('.form-actions');
+      const loadingMsg = document.getElementById('loading-msg');
+      const statusCheckbox = document.getElementById('statusAtivo'); // Pega a checkbox
+
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get('id');
+
+      if (!userId) { /* ... (erro igual) */ return; }
+
+      const userData = await buscarUsuarioPorId(userId); // Função buscarUsuarioPorId já retorna o Status
+
+      if (!userData) { /* ... (erro igual) */ return; }
+
+      // Preenche o formulário (igual)
+      document.getElementById('idUsuario').value = userData.idUsuario;
+      document.getElementById('nome').value = userData.nome || '';
+      document.getElementById('tipoUsuario').value = userData.tipoUsuario || '';
+      document.getElementById('apartamento').value = userData.apartamento || '';
+      document.getElementById('email').value = userData.email || '';
+      document.getElementById('telefone').value = userData.telefone || '';
+
+      // 🔹 PREENCHE A CHECKBOX DE STATUS 🔹
+      statusCheckbox.checked = (userData.status === 'Ativo');
+
+      // Mostra o formulário
+      loadingMsg.style.display = 'none';
+      formWrap.style.display = 'grid';
+      formActions.style.display = 'flex';
+
+      // Lógica de Submit (ACTUALIZADA para enviar Status)
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.textContent = 'Salvando...';
+
+        const updatedData = {
+          nome: document.getElementById('nome').value,
+          email: document.getElementById('email').value,
+          telefone: document.getElementById('telefone').value || null, 
+          apartamento: document.getElementById('apartamento').value || null, 
+          senha: document.getElementById('senha').value,
+          // 🔹 ADICIONADO: Envia o status com base na checkbox 🔹
+          status: statusCheckbox.checked ? 'Ativo' : 'Inativo' 
+        };
+
+        await atualizarUsuario(userId, updatedData); // Função já envia o status
+
+        btn.disabled = false; btn.textContent = 'Salvar Alterações';
+      });
+    });
+  </script>
+</body>
+</html>

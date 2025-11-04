@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <!-- CONTAINER LOGIN -->
+  <div class="login-container">
+  <div class="logo-container">
+    <img src=".\Imagens\logo.png" alt="Logo Recebi" class="logo"> 
+    <span class="app-name">Recebi</span>
+  </div>
+
+  <!-- CAMPOS LOGIN -->
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="senha" placeholder="Senha" required>
+    <a href="#" id="forgot-password">Esqueceu a senha?</a>
+    <button type="submit">Entrar</button>
+  </form>
+</div>
+
+
+<script src="script.js">
+  document.getElementById('forgot-password').addEventListener('click', function (e) {
+    e.preventDefault();
+    alert('Entre em contato com o administrador ou síndico para redefinir sua senha.');
+  }); 
+</script>
+
+</body>
+</html>

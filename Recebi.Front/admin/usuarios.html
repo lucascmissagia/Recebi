@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Usuários</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+      .toolbar .checkbox-row { display: flex; align-items: center; gap: 8px; margin-left: auto; /* Empurra para a direita */ }
+      .toolbar .checkbox-row label { margin: 0; font-size: 13px; color:#333; }
+      .toolbar .checkbox-row input[type="checkbox"] { width: auto; height: auto; margin: 0; }
+   </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+       <div class="header-left"> <div class="brand"><img src="../imagens/logo.png" alt="Logo Recebi"><span>Recebi</span></div> <nav class="nav"><a class="secondary" href="index.html">Home</a><a class="active" href="usuarios.html">Usuários</a><a class="secondary" href="encomendas.html">Encomendas</a><a class="secondary" href="Registros.html">Registros</a></nav></div>
+       <div class="user-dropdown"><button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button><div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div></div>
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Usuários</div>
+      
+      <div class="toolbar">
+        <input type="search" id="busca-usuarios" placeholder="Pesquisar por ID, nome, apt, tipo ou email...">
+        <div class="checkbox-row">
+            <input type="checkbox" id="show-inactive-users">
+            <label for="show-inactive-users">Mostrar Inativos</label>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data" id="tabela-usuarios">
+          <thead>
+            <tr>
+              <th>ID</th> 
+              <th>Nome</th> 
+              <th>Apartamento</th>
+              <th>Tipo</th> 
+              <th>Status</th> <th class="actions-column">Ações</th> 
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button id="userFirstPageBtn" class="btn secondary" disabled>&lt;&lt; Primeira</button> <button id="userPrevPageBtn" class="btn secondary" disabled>&lt; Anterior</button> <span id="userPageInfo">Página 1 de 1</span> <button id="userNextPageBtn" class="btn secondary" disabled>Próxima &gt;</button> <button id="userLastPageBtn" class="btn secondary" disabled>Última &gt;&gt;</button>
+      </div>
+
+      <div class="page-footer">
+        <button class="btn" id="btn-cadastrar">Cadastrar Novo Usuário</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ativa header
+      if (typeof setupHeaderSessao === 'function') { setupHeaderSessao(); }
+
+      const showInactiveCheckbox = document.getElementById('show-inactive-users');
+      const COLUMNS = 6; // Total de colunas na tabela de usuários
+
+      // Função para chamar renderUsuarios com o estado da checkbox
+      function loadUsers() {
+          if (typeof renderUsuarios === 'function') {
+              renderUsuarios({
+                  destinoTabela: '#tabela-usuarios tbody',
+                  filtroInput: '#busca-usuarios',
+                  pageInfoId: 'userPageInfo',
+                  prevBtnId: 'userPrevPageBtn',
+                  nextBtnId: 'userNextPageBtn',
+                  firstBtnId: 'userFirstPageBtn',
+                  lastBtnId: 'userLastPageBtn',
+                  showInactiveCheckboxId: 'show-inactive-users' 
+              });
+          } else {
+              const tbody = document.querySelector('#tabela-usuarios tbody');
+              if(tbody) tbody.innerHTML = `<tr><td colspan="${COLUMNS}">Erro: Função renderUsuarios não encontrada.</td></tr>`;
+          }
+      }
+
+      // Adiciona listener para a checkbox
+      showInactiveCheckbox.addEventListener('change', loadUsers);
+
+      // Carrega os usuários iniciais (apenas ativos por padrão)
+      loadUsers();
+
+      // Listener do botão Cadastrar
+      document.getElementById('btn-cadastrar').addEventListener('click', () => {
+        window.location.href = 'cadastrar-user.html';
+      });
+    });
+  </script>
+</body>
+</html>

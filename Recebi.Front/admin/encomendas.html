@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Todas as Encomendas</title>
+  <link rel="stylesheet" href="../style.css">
+  </head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left">
+        <div class="brand">
+          <img src="../imagens/logo.png" alt="Logo Recebi">
+          <span>Recebi</span>
+        </div>
+        <nav class="nav">
+          <a class="secondary" href="index.html">Home</a>
+          <a class="secondary" href="usuarios.html">Usuários</a>
+          <a class="active" href="encomendas.html">Encomendas</a>
+          <a class="secondary" href="Registros.html">Registros</a>
+        </nav>
+      </div>
+       <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+        <div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Todas as Encomendas</div>
+      
+      <div class="toolbar" style="flex-wrap: wrap;"> <input type="search" id="busca-entregas" placeholder="Pesquisar..." style="flex-grow: 1; min-width: 200px;">
+        <label for="data-inicio" style="font-size: 13px; margin-left: 10px;">De:</label>
+        <input type="date" id="data-inicio" style="padding: 8px;">
+        <label for="data-fim" style="font-size: 13px;">Até:</label>
+        <input type="date" id="data-fim" style="padding: 8px;">
+        <button class="btn" id="export-encomendas-btn" style="margin-left: auto;">Gerar Relatório CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data" id="tabela-entregas">
+          <thead>
+            <tr>
+              <th>ID</th> <th>Morador</th>
+              <th>Apartamento</th>
+              <th>Data Recebimento</th>
+              <th>Data Retirada</th>
+              <th>Porteiro</th>
+              <th>Cod. Rastreio</th>
+              <th class="actions-column">Ações</th> </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button id="encFirstPageBtn" class="btn secondary" disabled>&lt;&lt; Primeira</button>
+        <button id="encPrevPageBtn" class="btn secondary" disabled>&lt; Anterior</button>
+        <span id="encPageInfo">Página 1 de 1</span>
+        <button id="encNextPageBtn" class="btn secondary" disabled>Próxima &gt;</button>
+        <button id="encLastPageBtn" class="btn secondary" disabled>Última &gt;&gt;</button>
+      </div>
+
+      </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      // Ativa header
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+
+      // 🔹 ATUALIZADO: Chama renderTodasEncomendas com paginação e filtros 🔹
+      if(typeof renderTodasEncomendas === 'function') {
+          renderTodasEncomendas({
+              destinoTabela: '#tabela-entregas tbody',
+              filtroInput: '#busca-entregas',
+              dataInicioInput: '#data-inicio',
+              dataFimInput: '#data-fim',
+              pageInfoId: 'encPageInfo',
+              prevBtnId: 'encPrevPageBtn',
+              nextBtnId: 'encNextPageBtn',
+              firstBtnId: 'encFirstPageBtn',
+              lastBtnId: 'encLastPageBtn',
+              exportBtnId: 'export-encomendas-btn'
+          });
+      } else {
+           const tbody = document.querySelector('#tabela-entregas tbody');
+           if(tbody) tbody.innerHTML = '<tr><td colspan="8">Erro: Função renderTodasEncomendas não encontrada.</td></tr>';
+      }
+    });
+  </script>
+</body>
+</html>

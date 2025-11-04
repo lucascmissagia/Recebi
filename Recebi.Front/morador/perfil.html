@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recebi - Meu Perfil</title>
+  <link rel="stylesheet" href="../style.css"/>
+  
+  <style>
+    .user-dropdown { position: relative; }
+    .user-dropdown .user-pill {
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      background-color: #e9effa; border: 1px solid #cfdbf4; padding: 6px 10px;
+      border-radius: 20px; font-size: 13px; color: #16325c; font-family: Arial, Helvetica, sans-serif;
+    }
+    .user-dropdown .user-pill:hover { background: #dde6f3; }
+    .user-dropdown .user-pill svg { width: 12px; height: 12px; fill: currentColor; transition: transform 0.2s; }
+    .user-dropdown .user-pill.open svg { transform: rotate(180deg); }
+    .dropdown-menu {
+      display: none; position: absolute; right: 0; top: calc(100% + 5px); background: #fff;
+      border: 1px solid #e2e8f5; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 5px; z-index: 100; width: 120px;
+    }
+    .dropdown-menu.show { display: block; }
+    .dropdown-menu a {
+      display: block; padding: 8px 12px; text-decoration: none; color: #1b2430;
+      font-size: 14px; border-radius: 6px;
+    }
+    .dropdown-menu a:hover { background: #f5f7fb; color: #11345a; }
+    .dropdown-menu a.logout { color: #d93030; }
+    .dropdown-menu a.logout:hover { background: #fff2f2; }
+    
+    .profile-card{max-width:520px;margin:30px auto;background:#f7f7fb;border:1px solid #e2e8f5;border-radius:12px;padding:22px}
+    .profile-card h2{margin:0 0 14px}
+
+    .profile-card .form-row {
+      margin-bottom: 15px; 
+    }
+    .profile-card .form-row:last-child {
+       margin-bottom: 0;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left">
+        <div class="brand">
+          <img src="../imagens/logo.png" alt="Logo Recebi"/>
+          <span>Recebi</span>
+        </div>
+        <nav class="nav">
+          <a class="secondary" href="index.html">Home</a>
+          <a class="active" href="perfil.html">Preferências</a> </nav>
+      </div>
+      
+      <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill">
+          <span>Carregando...</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        </button>
+        <div id="logout-menu" class="dropdown-menu">
+          <a href="#" id="btn-logout" class="logout">Sair</a>
+        </div>
+      </div>
+      
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Meu Perfil</div>
+
+      <div class="profile-card">
+        <h2 id="nome-titulo">Carregando...</h2>
+
+        <div class="form-row">
+          <label>Nome</label>
+          <input id="nome" readonly style="background:#eee;">
+        </div>
+
+        <div class="form-row">
+          <label>Email</label>
+           <input id="email" type="email" readonly style="background:#eee;">
+        </div>
+
+        <div class="form-row">
+          <label>Telefone</label>
+           <input id="fone" placeholder="(Não informado)" readonly style="background:#eee;">
+        </div>
+
+        <div class="form-row">
+          <label>Apartamento</label>
+           <input id="apt" readonly style="background:#eee;">
+        </div>
+
+        </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    function loadUserData() {
+      let user;
+      try {
+        user = JSON.parse(localStorage.getItem(USER_KEY)); 
+      } catch (e) { user = null; }
+
+      if (!user) {
+        console.error('Dados do usuário não encontrados no localStorage.');
+        return; 
+      }
+      
+      // Preenche os campos do formulário (readonly)
+      document.getElementById('nome-titulo').textContent = user.nome || 'Meu Perfil';
+      document.getElementById('nome').value = user.nome || '';
+      document.getElementById('email').value = user.email || '';
+      document.getElementById('fone').value = user.telefone || ''; 
+      document.getElementById('apt').value = user.apartamento || ''; 
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // ATIVA O HEADER (NOME + LOGOUT)
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+      loadUserData(); 
+    });
+  </script>
+</body>
+</html>

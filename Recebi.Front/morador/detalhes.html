@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recebi - Detalhes da Encomenda</title>
+  <link rel="stylesheet" href="../style.css"/>
+
+  <style>
+    .user-dropdown { position: relative; }
+    .user-dropdown .user-pill {
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      background-color: #e9effa; border: 1px solid #cfdbf4; padding: 6px 10px;
+      border-radius: 20px; font-size: 13px; color: #16325c; font-family: Arial, Helvetica, sans-serif;
+    }
+    .user-dropdown .user-pill:hover { background: #dde6f3; }
+    .user-dropdown .user-pill svg { width: 12px; height: 12px; fill: currentColor; transition: transform 0.2s; }
+    .user-dropdown .user-pill.open svg { transform: rotate(180deg); }
+    .dropdown-menu {
+      display: none; position: absolute; right: 0; top: calc(100% + 5px); background: #fff;
+      border: 1px solid #e2e8f5; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 5px; z-index: 100; width: 120px;
+    }
+    .dropdown-menu.show { display: block; }
+    .dropdown-menu a {
+      display: block; padding: 8px 12px; text-decoration: none; color: #1b2430;
+      font-size: 14px; border-radius: 6px;
+    }
+    .dropdown-menu a:hover { background: #f5f7fb; color: #11345a; }
+    .dropdown-menu a.logout { color: #d93030; }
+    .dropdown-menu a.logout:hover { background: #fff2f2; }
+
+    .card {
+      max-width: 500px; width: 90%; margin: 30px auto 0; background: #f7f7fb;
+      border: 1px solid #e2e8f5; border-radius: 12px; padding: 22px; text-align: left;
+    }
+    .card h2 { text-align: center; margin: 4px 0 18px; }
+    .row { display: flex; justify-content: space-between; margin: 10px 0; flex-wrap: wrap; }
+    .row b { color: #16325c; margin-right: 5px; }
+    .row span { text-align: right; flex-grow: 1; word-break: break-word; }
+    .center {
+      display: flex; justify-content: center; height: auto !important;
+      align-items: initial !important; margin-top: 15px; margin-bottom: 30px;
+    }
+    .center .btn, .center .btn.secondary {
+      padding: 8px 16px; font-size: 14px;
+    }
+    .loading, .error { text-align: center; padding: 20px; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left">
+        <div class="brand">
+          <img src="../imagens/logo.png" alt="Logo Recebi"/>
+          <span>Recebi</span>
+        </div>
+        <nav class="nav">
+          <a class="secondary" href="index.html">Home</a>
+          <a class="secondary" href="perfil.html">Preferências</a>
+        </nav>
+      </div>
+
+      <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill">
+          <span>Carregando...</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        </button>
+        <div id="logout-menu" class="dropdown-menu">
+          <a href="#" id="btn-logout" class="logout">Sair</a>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Detalhes da Encomenda</div>
+      <div class="card" id="card-detalhes">
+        <p class="loading">Carregando detalhes...</p>
+      </div>
+
+      <div class="center">
+         <a class="btn secondary" href="index.html">Voltar para Lista</a>
+       </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+
+      const card = document.getElementById('card-detalhes');
+      const params = new URLSearchParams(window.location.search);
+      const encomendaId = params.get('id');
+
+      if (!encomendaId) {
+        card.innerHTML = '<p class="error">ID da encomenda não fornecido na URL.</p>';
+        return;
+      }
+
+      try {
+        // Chama a API para buscar os detalhes
+        const response = await fetchApi(`/Morador/encomenda/${encomendaId}`); 
+
+        if (!response.ok) {
+          const errJson = await response.json().catch(() => ({}));
+          if (response.status === 403) {
+               throw new Error(errJson.message || 'Você não tem permissão para ver esta encomenda.');
+          }
+          throw new Error(errJson.message || `Falha ao buscar detalhes (Status: ${response.status})`);
+        }
+
+        const item = await response.json();
+
+        card.innerHTML = `
+          <h2>${item.descricao || 'Encomenda'}</h2>
+          <div class="row"><b>ID da Encomenda:</b><span>${item.idEncomenda}</span></div>
+          <div class="row"><b>Morador:</b><span>${item.morador || 'N/A'}</span></div>
+          <div class="row"><b>Apartamento:</b><span>${item.apartamento}</span></div>
+          <div class="row"><b>Código de Rastreio:</b><span>${item.codigoRastreio || '-'}</span></div>
+          <div class="row"><b>Data de Recebimento:</b><span>${item.dataEntrada ? new Date(item.dataEntrada).toLocaleString('pt-BR') : '-'}</span></div>
+          <div class="row"><b>Status:</b><span>${item.status}</span></div>
+          <div class="row"><b>Data de Retirada:</b><span>${item.dataRetirada ? new Date(item.dataRetirada).toLocaleString('pt-BR') : '-'}</span></div>
+          <div class="row"><b>Porteiro (Registro):</b><span>${item.porteiro || 'N/A'}</span></div> 
+          ${item.status === 'Pendente' ?
+            `<div class="center">
+               <button class="btn" id="btn-confirmar">Confirmar retirada</button>
+             </div>`
+            : ''
+          }
+        `;
+
+        // Adiciona evento ao botão dinâmico
+        const btnConfirmar = document.getElementById('btn-confirmar');
+        if (btnConfirmar) {
+            btnConfirmar.addEventListener('click', async () => {
+                btnConfirmar.disabled = true;
+                btnConfirmar.textContent = 'Confirmando...';
+                if(typeof confirmarMinhaRetirada === 'function') {
+                    await confirmarMinhaRetirada(item.idEncomenda);
+                }
+                btnConfirmar.disabled = false;
+                btnConfirmar.textContent = 'Confirmar retirada';
+            });
+        }
+
+      } catch (err) {
+        card.innerHTML = `<p class="error">Erro ao carregar detalhes: ${err.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

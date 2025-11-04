@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recebi - Admin</title>
+  <link rel="stylesheet" href="../style.css" />
+  </head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left">
+        <div class="brand">
+          <img src="../imagens/logo.png" alt="Logo Recebi" />
+          <span>Recebi</span>
+        </div>
+        <nav class="nav">
+          <a class="active" href="index.html">Home</a>
+          <a class="secondary" href="usuarios.html">Usuários</a>
+          <a class="secondary" href="encomendas.html">Encomendas</a>
+          <a class="secondary" href="Registros.html">Registros</a> 
+        </nav>
+      </div>
+      <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+        <div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Painel do Síndico</div>
+      <div class="dashboard-grid">
+        <section class="dash-card">
+          <h2>Últimos Usuários Ativos</h2> <div class="table-wrap" style="padding: 0;"> 
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>ID</th> 
+                  <th>Nome</th> 
+                  <th>Apartamento</th>
+                  <th>Tipo</th> 
+                </tr>
+              </thead>
+              <tbody id="tabela-usuarios-resumo"></tbody> </table>
+          </div>
+          <div class="page-footer">
+            <a class="link-like" href="usuarios.html">Ver todos</a>
+          </div>
+        </section>
+
+        <section class="dash-card">
+          <h2>Últimas Entregas Recebidas</h2> <div class="table-wrap" style="padding: 0;"> 
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>ID</th> 
+                  <th>Morador</th>
+                  <th>Data Recebimento</th>
+                  <th>Status</th> 
+                </tr>
+              </thead>
+              <tbody id="tabela-entregas-resumo"></tbody> </table>
+          </div>
+          <div class="page-footer">
+            <a class="link-like" href="encomendas.html">Ver todas</a>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    // 🔹 SCRIPT INLINE CORRIGIDO E SIMPLIFICADO 🔹
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ativa header
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+
+      // Renderizar amostra de usuários
+      if (typeof renderUsuariosResumo === 'function') {
+          renderUsuariosResumo({
+              destinoTabela: '#tabela-usuarios-resumo',
+              limit: 10 // Mostra os 10 primeiros
+          });
+      } else {
+           const tbody = document.getElementById('tabela-usuarios-resumo');
+           if (tbody) tbody.innerHTML = '<tr><td colspan="4">Erro: Função renderUsuariosResumo não encontrada.</td></tr>';
+      }
+
+      // Renderizar amostra de entregas
+      if (typeof renderEncomendasResumo === 'function') {
+          renderEncomendasResumo({
+              destinoTabela: '#tabela-entregas-resumo',
+              limit: 10 // Mostra as 10 primeiras
+          });
+      } else {
+          const tbody = document.getElementById('tabela-entregas-resumo');
+          if (tbody) tbody.innerHTML = '<tr><td colspan="4">Erro: Função renderEncomendasResumo não encontrada.</td></tr>';
+      }
+    });
+  </script>
+</body>
+</html>

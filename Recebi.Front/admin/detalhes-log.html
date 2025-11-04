@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Detalhes do Log</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+      .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+      .details-item { padding: 10px 0; border-bottom: 1px dashed #eee; }
+      .details-item:last-child { border-bottom: none; }
+      .details-item strong { display: block; color: #11345a; font-size: 14px; margin-bottom: 3px; }
+      .full-row { grid-column: span 2; }
+      pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; font-family: monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left"> 
+          <div class="brand"><img src="../imagens/logo.png" alt="Logo Recebi"><span>Recebi</span></div> 
+          <nav class="nav">
+            <a class="secondary" href="index.html">Home</a><a class="secondary" href="usuarios.html">Usuários</a>
+            <a class="secondary" href="encomendas.html">Encomendas</a><a class="active" href="Registros.html">Registros</a>
+          </nav>
+       </div>
+       <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+        <div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Detalhes do Registro de Atividade <span id="log-id"></span></div>
+      
+      <div id="details-container" class="details-grid">
+        <div class="full-row" id="loading-message">Carregando detalhes...</div>
+      </div>
+
+      <div class="page-footer">
+        <button class="btn secondary" onclick="window.history.back()">Voltar para Registros</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof setupHeaderSessao === 'function') { setupHeaderSessao(); }
+
+      const id = new URLSearchParams(window.location.search).get('id');
+      const container = document.getElementById('details-container');
+      const idSpan = document.getElementById('log-id');
+      idSpan.textContent = id ? `(ID: ${id})` : '(ID não encontrado)';
+
+      if (!id) {
+          container.innerHTML = '<div class="full-row" style="color:red;">ID do Log não fornecido na URL.</div>';
+          return;
+      }
+
+      const dados = await buscarDetalhesLogPorId(id);
+
+      if (dados) {
+          let detalhesJson = dados.detalhes || 'N/A';
+          try {
+              // Formata o JSON se existir
+              detalhesJson = JSON.stringify(JSON.parse(detalhesJson), null, 2);
+          } catch {
+              // Se não for JSON válido, mantém a string
+          }
+
+          container.innerHTML = `
+            <div class="details-item full-row"><strong>Ação Principal</strong> ${dados.acao}</div>
+            
+            <div class="details-item"><strong>ID do Log</strong> ${dados.idHistorico}</div>
+            <div class="details-item"><strong>Tipo</strong> ${dados.tipo}</div>
+            
+            <div class="details-item"><strong>Usuário Responsável</strong> ${dados.usuario || 'N/A'} (ID: ${dados.idUsuario})</div>
+            <div class="details-item"><strong>Data/Hora</strong> ${formatarDataHora(dados.dataHora)}</div>
+            
+            <div class="details-item"><strong>Encomenda Referência (ID)</strong> ${dados.idEncomenda || '-'}</div>
+            <div class="details-item"><strong>Apartamento</strong> ${dados.encomendaApartamento || '-'}</div>
+
+            <div class="details-item full-row">
+              <strong>Detalhes da API (Payload)</strong>
+              <pre>${detalhesJson}</pre>
+            </div>
+          `;
+      } else {
+           container.innerHTML = '<div class="full-row" style="color:red;">Falha ao carregar detalhes. Verifique o console.</div>';
+      }
+    });
+  </script>
+</body>
+</html>

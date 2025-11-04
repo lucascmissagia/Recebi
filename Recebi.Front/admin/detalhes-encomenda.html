@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Detalhes da Encomenda</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+      .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+      .details-item { padding: 10px 0; border-bottom: 1px dashed #eee; }
+      .details-item:last-child { border-bottom: none; }
+      .details-item strong { display: block; color: #11345a; font-size: 14px; margin-bottom: 3px; }
+      .full-row { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left"> 
+          <div class="brand"><img src="../imagens/logo.png" alt="Logo Recebi"><span>Recebi</span></div> 
+          <nav class="nav">
+            <a class="secondary" href="index.html">Home</a><a class="secondary" href="usuarios.html">Usuários</a>
+            <a class="active" href="encomendas.html">Encomendas</a><a class="secondary" href="Registros.html">Registros</a>
+          </nav>
+       </div>
+       <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+        <div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Detalhes da Encomenda <span id="encomenda-id"></span></div>
+      
+      <div id="details-container" class="details-grid">
+        <div class="full-row" id="loading-message">Carregando detalhes...</div>
+      </div>
+
+      <div class="page-footer">
+        <button class="btn secondary" onclick="window.history.back()">Voltar para Encomendas</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof setupHeaderSessao === 'function') { setupHeaderSessao(); }
+
+      const id = new URLSearchParams(window.location.search).get('id');
+      const container = document.getElementById('details-container');
+      const idSpan = document.getElementById('encomenda-id');
+      idSpan.textContent = id ? `(ID: ${id})` : '(ID não encontrado)';
+
+      if (!id) {
+          container.innerHTML = '<div class="full-row" style="color:red;">ID da encomenda não fornecido na URL.</div>';
+          return;
+      }
+
+      const dados = await buscarDetalhesEncomendaPorId(id);
+
+      if (dados) {
+          container.innerHTML = `
+            <div class="details-item"><strong>ID</strong> ${dados.idEncomenda}</div>
+            <div class="details-item"><strong>Status</strong> ${dados.status}</div>
+            
+            <div class="details-item"><strong>Morador</strong> ${dados.morador || 'N/A'}</div>
+            <div class="details-item"><strong>Apartamento</strong> ${dados.apartamento}</div>
+            
+            <div class="details-item"><strong>Data Entrada</strong> ${formatarDataHora(dados.dataEntrada)}</div>
+            <div class="details-item"><strong>Data Retirada</strong> ${dados.dataRetirada ? formatarDataHora(dados.dataRetirada) : '-'}</div>
+
+            <div class="details-item"><strong>Código Rastreio</strong> ${dados.codigoRastreio || '-'}</div>
+            <div class="details-item"><strong>Porteiro (Registro)</strong> ${dados.porteiro || 'N/A'}</div>
+
+            <div class="details-item full-row"><strong>Descrição</strong> ${dados.descricao || '-'}</div>
+          `;
+      } else {
+           container.innerHTML = '<div class="full-row" style="color:red;">Falha ao carregar detalhes. Verifique o console.</div>';
+      }
+    });
+  </script>
+</body>
+</html>

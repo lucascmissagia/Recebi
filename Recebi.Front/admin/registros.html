@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recebi - Registros do Sistema</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+      .modal { display: none; /* Hidden by default */ position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+      .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; position: relative; }
+      .modal-close { color: #aaa; float: right; font-size: 28px; font-weight: bold; position: absolute; top: 5px; right: 15px; }
+      .modal-close:hover, .modal-close:focus { color: black; text-decoration: none; cursor: pointer; }
+      .modal-body { margin-top: 20px; white-space: pre-wrap; /* Mantém quebras de linha */ font-family: monospace; font-size: 13px; max-height: 400px; overflow-y: auto; }
+      .modal-body strong { color: #11345a; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+     <header class="header">
+        <div class="header-left">
+          <div class="brand"><img src="../imagens/logo.png" alt="Logo Recebi"><span>Recebi</span></div>
+          <nav class="nav">
+            <a class="secondary" href="index.html">Home</a><a class="secondary" href="usuarios.html">Usuários</a>
+            <a class="secondary" href="encomendas.html">Encomendas</a><a class="active" href="Registros.html">Registros</a>
+          </nav>
+        </div>
+        <div class="user-dropdown">
+          <button id="user-pill-btn" class="user-pill"><span>Carregando...</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+          <div id="logout-menu" class="dropdown-menu"><a href="#" id="btn-logout" class="logout">Sair</a></div>
+        </div>
+      </header>
+
+    <main class="container">
+      <div class="titlebar">Registros de Atividade (Histórico)</div>
+      <div class="toolbar">
+         <button class="btn" id="export-logs-btn">Gerar Relatório CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data" id="tabela-logs">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuário</th>
+              <th>Ação</th>
+              <th>Tipo</th>
+              <th>Data/Hora</th>
+              <th>Encomenda Ref.</th>
+              <th>Detalhes</th> </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button id="logsFirstPageBtn" class="btn secondary" disabled>&lt;&lt; Primeira</button>
+        <button id="logsPrevPageBtn" class="btn secondary" disabled>&lt; Anterior</button>
+        <span id="logsPageInfo">Página 1 de 1</span>
+        <button id="logsNextPageBtn" class="btn secondary" disabled>Próxima &gt;</button>
+        <button id="logsLastPageBtn" class="btn secondary" disabled>Última &gt;&gt;</button>
+      </div>
+    </main>
+
+    <div id="detailsModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h4>Detalhes da Ação</h4>
+        <div id="modalBody" class="modal-body"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    // Funções para controlar o Modal
+    const modal = document.getElementById("detailsModal");
+    const modalBody = document.getElementById("modalBody");
+    function showModal(content) {
+      modalBody.innerHTML = content;
+      modal.style.display = "block";
+    }
+    function closeModal() {
+      modal.style.display = "none";
+      modalBody.innerHTML = '';
+    }
+    // Fecha se clicar fora
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        closeModal();
+      }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+      if(typeof renderLogs === 'function') {
+          renderLogs({
+              destinoTabela: '#tabela-logs tbody',
+              pageInfoId: 'logsPageInfo',
+              prevBtnId: 'logsPrevPageBtn',
+              nextBtnId: 'logsNextPageBtn',
+              firstBtnId: 'logsFirstPageBtn',
+              lastBtnId: 'logsLastPageBtn',
+              exportBtnId: 'export-logs-btn' 
+          });
+      } else {
+           const tbody = document.querySelector('#tabela-logs tbody');
+           if(tbody) tbody.innerHTML = '<tr><td colspan="7">Erro: Função renderLogs não encontrada.</td></tr>';
+      }
+    });
+  </script>
+</body>
+</html>

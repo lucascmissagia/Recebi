@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recebi - Entregas</title>
+  <link rel="stylesheet" href="../style.css"/>
+
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left">
+        <div class="brand">
+          <img src="../imagens/logo.png" alt="Logo Recebi" />
+          <span>Recebi</span>
+        </div>
+        <nav class="nav">
+          <a class="secondary" href="index.html">Home</a>
+          <a class="active" href="entregas.html">Entregas</a>
+        </nav>
+      </div>
+
+      <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill">
+          <span>Carregando...</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        </button>
+        <div id="logout-menu" class="dropdown-menu">
+          <a href="#" id="btn-logout" class="logout">Sair</a>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Entregas</div>
+
+      <div class="toolbar">
+        <input type="search" id="busca-entregas" placeholder="Pesquisar... (nome, apartamento, código)">
+        <button class="btn" id="btn-adicionar">Adicionar entrega</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data" id="tabela-entregas">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Morador</th>
+              <th>Apartamento</th>
+              <th>Data Recebimento</th>
+              <th>Data Retirada</th>
+              <th>Porteiro</th>
+              <th>Cod. Rastreio</th>
+            </tr>
+          </thead>
+          <tbody>
+            </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div class="pagination">
+        <button id="firstPageBtn" class="btn secondary" disabled>&lt;&lt; Primeira</button>
+        <button id="prevPageBtn" class="btn secondary" disabled>&lt; Anterior</button>
+        <span id="pageInfo">Página 1 de 1</span>
+        <button id="nextPageBtn" class="btn secondary" disabled>Próxima &gt;</button>
+        <button id="lastPageBtn" class="btn secondary" disabled>Última &gt;&gt;</button>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+
+      if (typeof renderEntregas === 'function') {
+        renderEntregas({ 
+          endpoint: '/Porteiro/Encomendas', 
+          destinoTabela: '#tabela-entregas tbody', 
+          filtroInput: '#busca-entregas' 
+        });
+      }
+      
+      document.getElementById('btn-adicionar').addEventListener('click', ()=>{
+        window.location.href = 'cadastrar-encomenda.html';
+      });
+    });
+  </script>
+</body>
+</html>

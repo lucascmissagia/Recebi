@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recebi - Cadastrar Entrega</title>
+  <link rel="stylesheet" href="../style.css"/>
+
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-left">
+        <div class="brand">
+          <img src="../imagens/logo.png" alt="Logo Recebi" />
+          <span>Recebi</span>
+        </div>
+        <nav class="nav">
+          <a class="secondary" href="index.html">Home</a>
+          <a class="secondary" href="entregas.html">Entregas</a>
+        </nav>
+      </div>
+
+      <div class="user-dropdown">
+        <button id="user-pill-btn" class="user-pill">
+          <span>Carregando...</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        </button>
+        <div id="logout-menu" class="dropdown-menu">
+          <a href="#" id="btn-logout" class="logout">Sair</a>
+        </div>
+      </div>
+      
+    </header>
+
+    <main class="container">
+      <div class="titlebar">Cadastrar Entrega</div>
+
+<form id="form-cadastro">
+        <div class="form-wrap">
+
+          <div class="form-row autocomplete-container"> 
+            <label for="nomeMorador">Nome do Morador</label>
+            <input id="nomeMorador" name="nomeMorador" type="text" required 
+                   placeholder="Digite o nome para buscar..." autocomplete="off">
+            <div id="morador-suggestions" class="suggestions-list"></div> 
+            <input type="hidden" id="idUsuario" name="idUsuario"> 
+          </div>
+
+          <div class="form-row">
+            <label for="apartamento">Apartamento</label>
+            <input id="apartamento" name="apartamento" type="text" required 
+                   placeholder="Selecione um morador" readonly style="background:#eee;"> 
+          </div>
+
+          <div class="form-row" style="grid-column: 1 / -1;">
+            <label for="descricao">Descrição da Encomenda</label>
+            <textarea id="descricao" name="descricao" required placeholder="Ex.: Caixa grande, frágil, Mercado Livre"></textarea>
+          </div>
+
+          <div class="form-row" style="grid-column: 1 / -1;">
+            <label for="codigoRastreio">Código de Rastreio (Opcional)</label>
+            <input id="codigoRastreio" name="codigoRastreio" type="text" placeholder="Ex.: CP839762098AA">
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <a href="entregas.html" class="btn secondary" type="button">Cancelar</a>
+          <button class="btn" type="submit">Salvar</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof setupHeaderSessao === 'function') {
+        setupHeaderSessao();
+      }
+
+      const nomeMoradorInput = document.getElementById('nomeMorador');
+      const suggestionsContainer = document.getElementById('morador-suggestions');
+      const idUsuarioInput = document.getElementById('idUsuario');
+      const apartamentoInput = document.getElementById('apartamento');
+      let debounceTimer;
+
+      async function buscarSugestoes() {
+        const query = nomeMoradorInput.value.trim();
+        idUsuarioInput.value = ''; 
+        apartamentoInput.value = ''; 
+
+        if (query.length < 2) {
+          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.style.display = 'none';
+          return;
+        }
+
+        try {
+          const response = await fetchApi(`/Porteiro/BuscarMoradores?query=${encodeURIComponent(query)}`);
+          if (!response.ok) throw new Error('Falha ao buscar');
+          
+          const moradores = await response.json();
+          suggestionsContainer.innerHTML = ''; 
+
+          if (moradores.length > 0) {
+            moradores.forEach(morador => {
+              const div = document.createElement('div');
+              div.textContent = `${morador.nome} (Apt: ${morador.apartamento || 'N/A'})`;
+              div.dataset.id = morador.idUsuario;
+              div.dataset.nome = morador.nome;
+              div.dataset.apt = morador.apartamento || '';
+              
+              div.addEventListener('click', () => {
+                nomeMoradorInput.value = div.dataset.nome; 
+                idUsuarioInput.value = div.dataset.id;     
+                apartamentoInput.value = div.dataset.apt;  
+                suggestionsContainer.innerHTML = '';       
+                suggestionsContainer.style.display = 'none';
+              });
+              suggestionsContainer.appendChild(div);
+            });
+            suggestionsContainer.style.display = 'block'; 
+          } else {
+            suggestionsContainer.innerHTML = '<div class="no-results">Nenhum morador encontrado</div>';
+            suggestionsContainer.style.display = 'block';
+          }
+        } catch (error) {
+          console.error("Erro ao buscar sugestões:", error);
+          suggestionsContainer.innerHTML = '<div class="no-results">Erro ao buscar</div>';
+          suggestionsContainer.style.display = 'block';
+        }
+      }
+
+      nomeMoradorInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(buscarSugestoes, 300); 
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!nomeMoradorInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+          suggestionsContainer.style.display = 'none';
+        }
+      });
+
+      document.getElementById('form-cadastro').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const idUsuario = idUsuarioInput.value; 
+        const apartamento = apartamentoInput.value;
+        const descricao = document.getElementById('descricao').value.trim();
+        const codigoRastreio = document.getElementById('codigoRastreio').value.trim();
+
+        if (!idUsuario) { 
+          alert('Por favor, digite o nome do morador e selecione uma opção da lista.');
+          return;
+        }
+        if (!apartamento || !descricao) { 
+          alert('Preencha Apartamento e Descrição.');
+          return;
+        }
+
+        const novaEncomenda = {
+          idUsuario: parseInt(idUsuario, 10),
+          apartamento: apartamento,
+          descricao: descricao,
+          codigoRastreio: codigoRastreio || null
+        };
+
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Salvando...';
+
+        if (typeof registrarNovaEncomenda === 'function') {
+          await registrarNovaEncomenda(novaEncomenda);
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Salvar';
+      });
+    });
+  </script>
+</body>
+</html>
